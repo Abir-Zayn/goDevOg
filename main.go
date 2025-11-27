@@ -7,26 +7,27 @@ import (
 	"time"
 
 	"github.com/Abir-Zayn/goDevOg.git/internal/app"
+	"github.com/Abir-Zayn/goDevOg.git/internal/routes"
 )
 
 func main() {
-
 	var port int
 	flag.IntVar(&port, "port", 8080, "go backend server port")
 	flag.Parse()
-	app, err := app.NewApplication()
 
+	app, err := app.NewApplication()
 	if err != nil {
 		panic(err)
 	}
 
-	http.HandleFunc("/health", HealthCheck)
+	r := routes.SetupRoutes(app)
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", port),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
+		Handler:      r,
 	}
 
 	app.Logger.Printf("Running on the Port %d", port)
@@ -35,8 +36,4 @@ func main() {
 	if err != nil {
 		app.Logger.Fatal(err)
 	}
-}
-
-func HealthCheck(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Status is available\n")
 }
